@@ -1,0 +1,80 @@
+---
+title: "Why Would you Want to Use R Markdown?"
+author: "Daniel Schiff"
+date: "3/21/2022"
+output: powerpoint_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+require(rmarkdown)
+```
+
+# Why would you want to use R Markdown
+
+
+## My Coding Background
+
+* Started coding in university ~5 years ago
+* My code tended to be messy and unorganized
+* A Professor Suggested R Markdown
+
+
+## The Basics of R Markdown (part 1)
+
+1. Workflow
+   + R Markdown is a dynamic report used to embed R code into documentations
+2. Open File
+   + Open files via File-> New File -> R Markdown
+3. Markdown
+    + Using the markdown text, a report will generate
+
+## The Basics of R Markdown (part 2)
+4. Choose Output
+    + YAML ~~yet-another-markdown--language~~ header explains how the document will be built
+5. Embed Code
+   + Embed code that to generate output and renderings
+6. Render
+    + Build rendering in final report TLFs
+
+
+## Open File
++ Open files via File-> New File -> R Markdown
++ Select from the pop-up window
++ Click OK
+
+## Markdown
+* Syntax
+    + " * * " or " _ _ " = *word* or _word_
+    + " ** ** " or " __ __ " = **word** or __word__
+    + Equations: $\mu =(\Sigma Xi)/N$
+    + Superscript x^2^
+    + Strikethrough ~~strikethrough~~
+    
+
+## Choose Output
+* YAML
+    + PDF
+    + Word Docx
+    + HTML
+    + PowerPoint Pptx
+        
+## Embed Code
+
+* Embed code such as the summary of the iris dataset
+
+```{r}
+
+summary(iris)
+
+```
+
+## Render
+
+* Rendering plots using the iris dataset
+
+```{r}
+
+plot(iris$Sepal.Length, iris$Sepal.Width)
+
+```
