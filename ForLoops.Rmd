@@ -1,0 +1,164 @@
+---
+title: "Use of For Loops"
+author: "Daniel Schiff"
+date: "`r format(Sys.Date(),'%B %d, %Y')`"
+output:
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## The Importance of For Loops
+
+In almost everything we do, we see repetition resulting in the development of
+stable routines and production. For example, Henry Ford was able to find
+reproducibility in the assembly line. Manufacturing car after car the same way
+to improve cost, and efficiency. Like Ford's method, modern computers can repeat
+a process over and over again with accuracy and exactness based on the
+information (code) it is fed. In fact, this
+is one of the great advantages of computing machines.
+
+In R, we have a several functions that will do tasks repeatedly while some condition(s) are met.
+
++ **while loops**, which do something _while_ a statement or group of statements are true. 
++ **repeat loops**, which will continue to do something until it is told to
+not continue. If it is never told not to continue,  it will keep running infinitely.
++ **for loops**, which do something while going through values of a sequence or list that is fed to it. We'll look at this loop in detail since it is so commonly used.
+
+We develop an example of how to use a _for loop_ for calculating probabilities 
+when sampling without
+replacement. Suppose we have 100 Skittles, and we know that 3 would kill you if 
+you ate them, while the other 97 are 100% safe.
+
+The question we want to find out is, given you have eaten a certain number of
+Skittles already, *what is the chance that you'll remain alive after eating the
+next Skittle*.
+
+The first time you eat one of the Skittles, you
+have a 97 out of 100 chance of staying alive (97%). The odds of
+staying alive will go down, as you eat more Skittles (sampling without
+replacement). By the time you eat the 31st Skittle, the probability that the
+next Skittle won't kill you is only 25%.
+
+> In the jargon of probability theory, we are simulating a [**geometric distribution**](https://en.wikipedia.org/wiki/Geometric_distribution), 
+which can be thought of as the probability distribution of the number of successes (staying alive) before experiencing a failure (dying)
+
+```{r, warning=FALSE, message=FALSE}
+require(tidyverse)
+# Set p to NA
+p <- NA
+# Set a numerator
+n <- 0
+# Set Denominator
+d <- 3
+# Set an empty data frame
+output <- NA
+
+e <- 1
+# expected life value, if you eat no skittles 100% chance of living or 1
+
+# Write a for loop to produce probability that they will not kill you
+for (i in 98:1) {
+  # make the values into a vector
+  out <- data.frame(i, n, d, p, e)
+  # Add one to the numerator
+  n <- n + 1
+  # Add one to the denominator
+  d <- d + 1
+  # combine the vector into the data frame
+  output <- rbind(output, out) %>%
+    mutate(p = n / d, e = e * p) %>%
+    drop_na(p) # drop if there are a null vector
+}
+
+# Include a Graphic
+
+g <- ggplot(output, aes(x = i, y = e)) +
+  geom_point(shape = 1, color = "red") +
+  xlab("Number of Skittles Consumed") +
+  ylab("Life Expectancy") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  theme_bw() +
+  labs(title = "Skittle Probability Rate")
+
+g
+```
+
+## Lets look more into for loops 
+
+_For loops_ are a very useful method to use for many repetitive tasks, since it 
+automates the process and also, won't make a mistake `r emo::ji("happy")`. For 
+example, if we need to create the same data visualization for multiple data sets,
+we can use a for loop to create them without the hassle, and danger, of copying 
+and pasting our code. The following is an example of drawing histograms for the 
+distribution of a random variable, as we draw larger and larger samples from its
+distribution. We loop over a sequence of values that specify the number of samples
+we are drawing (`seq(25, 500, 25)`), and as we look see, the histograms slowly
+start to look like the familiar bell curve. Notice that the `seq` function allows
+us to create arbitrary regular sequences, so we're not restricted to 1,2,3,...
+
+
+
+```{r, warning=FALSE, message=FALSE}
+
+for (m in seq(50, 500, 50)) {
+
+  # Set the seed for standard sampling
+  set.seed(435)
+
+  # Sample a random normal distribuition
+  x <- rnorm(n = m, mean = 0, sd = 1)
+  x <- data.frame(x)
+
+  p <- ggplot(x, aes(x)) +
+    geom_histogram(bins = 50) +
+    labs(title = paste0("N = ", m))
+
+  print(p)
+}
+```
+
+
+## We Can Loop For Categorical or Factor Data
+
+When looking at loops, at first numbers come to mind.
+However, _for loops_ can be run on any arbitray **list** of objects. These could be 
+a list of data.frame objects, a list of models, or a list of words. In the following loop, we look at the `species` variable in the iris data set. We do a complex loop of group_by() and summarize() as seen in the bit of code below it. The idea is to show 
+how a list of words derived from your data can be used in a for loop. 
+
+
+```{r}
+outputiris <- list() # create an empty list
+
+for (sp in levels(iris$Species)) {
+  print(sp)
+  # I am just kidding lets take it to the next step
+
+  # Lets group by using a filter to filter the type of species we would want
+  outiris <- filter(iris, Species == sp) %>%
+    # Lets set the means
+    summarise(
+      Species = sp, slMean = mean(Sepal.Length), swMean = mean(Sepal.Width),
+      plMean = mean(Petal.Length), pwMean = mean(Petal.Width)
+    )
+  outputiris[[sp]] <- outiris # Save the result into the list, which is now a named list
+}
+
+outputiris <- bind_rows(outputiris, .id='Species')
+print(outputiris)
+```
+
+There is an easier and quicker way to do this, but the previous example was meant
+to show how we _can_ do it using for loops.
+
+```{r}
+ iris %>%
+  group_by(Species) %>%
+  summarise(
+    slMean = mean(Sepal.Length), swMean = mean(Sepal.Width),
+    plMean = mean(Petal.Length), pwMean = mean(Petal.Width)
+  )
+```
